@@ -1,23 +1,53 @@
-import logo from './logo.svg';
-import './App.css';
+import React, { useEffect, useState } from 'react';
+import { useDispatch,useSelector } from 'react-redux';
+import { fetchCategories,fetchJoke } from './features/jokesSlice';
+import './App.css'
+
 
 function App() {
+const dispatch = useDispatch();
+  const { categories, joke, loading, error } = useSelector((state) => state.jokes);
+  const [categoryInput, setCategoryInput] = useState('');
+
+  useEffect(() => {
+    dispatch(fetchCategories());
+  }, [dispatch]);
+
+  const handleGetJoke = () => {
+    dispatch(fetchJoke(categoryInput.trim().toLowerCase()));
+  };
+
   return (
-    <div className="App">
-      <header className="App-header">
-        <img src={logo} className="App-logo" alt="logo" />
-        <p>
-          Edit <code>src/App.js</code> and save to reload.
-        </p>
-        <a
-          className="App-link"
-          href="https://reactjs.org"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          Learn React
-        </a>
-      </header>
+    <div className="app">
+      <header>Chuck Norris Jokes</header>
+
+      <div className="input-section">
+        <input
+          type="text"
+          placeholder="Enter category"
+          value={categoryInput}
+          onChange={(e) => setCategoryInput(e.target.value)}
+        />
+        <button onClick={handleGetJoke}>
+          {categoryInput.trim()
+            ? `Get from ${categoryInput.trim()}`
+            : 'Get Random'}
+        </button>
+      </div>
+
+      {loading && <div className="loading">Loading...</div>}
+      {joke && <div className="joke">{joke}</div>}
+
+      {error && (
+        <div className="error">
+          {error}
+          {error === 'No category found' && categories.length > 0 && (
+            <div className="categories">
+              Available: {categories.join(', ')}
+            </div>
+          )}
+        </div>
+      )}
     </div>
   );
 }
